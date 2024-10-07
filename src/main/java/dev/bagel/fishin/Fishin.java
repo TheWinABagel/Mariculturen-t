@@ -2,6 +2,7 @@ package dev.bagel.fishin;
 
 import com.mojang.logging.LogUtils;
 import dev.bagel.fishin.registry.ModBlocks;
+import dev.bagel.fishin.registry.ModEntities;
 import dev.bagel.fishin.registry.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -44,18 +45,20 @@ public class Fishin {
             .icon(() -> ModItems.EXAMPLE_ITEM.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
                 output.accept(ModItems.EXAMPLE_ITEM.get());
+                output.accept(ModItems.BASIC_ROD);
             }).build());
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public Fishin(IEventBus modEventBus, ModContainer modContainer) {
         // Register the commonSetup method for modloading
-        modEventBus.addListener(this::commonSetup);
+//        modEventBus.addListener(this::commonSetup);
 
         CREATIVE_MODE_TABS.register(modEventBus);
-        ModItems.init(modEventBus);
+        ModEntities.init(modEventBus);
         ModBlocks.init(modEventBus);
+        ModItems.init(modEventBus);
 
-        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+//        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
