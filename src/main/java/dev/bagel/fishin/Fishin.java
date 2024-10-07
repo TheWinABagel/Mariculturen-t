@@ -1,18 +1,19 @@
 package dev.bagel.fishin;
 
 import com.mojang.logging.LogUtils;
+import dev.bagel.fishin.client.FishingLayer;
 import dev.bagel.fishin.registry.ModBlocks;
+import dev.bagel.fishin.registry.ModComponents;
 import dev.bagel.fishin.registry.ModEntities;
 import dev.bagel.fishin.registry.ModItems;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -26,6 +27,10 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -46,6 +51,7 @@ public class Fishin {
             .displayItems((parameters, output) -> {
                 output.accept(ModItems.EXAMPLE_ITEM.get());
                 output.accept(ModItems.BASIC_ROD);
+                output.accept(ModItems.DEBUG_FISHING_ARMOR);
             }).build());
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -57,6 +63,7 @@ public class Fishin {
         ModEntities.init(modEventBus);
         ModBlocks.init(modEventBus);
         ModItems.init(modEventBus);
+        ModComponents.init(modEventBus);
 
 //        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
@@ -73,6 +80,9 @@ public class Fishin {
         Config.items.forEach((item) -> LOGGER.info("ITEM >> {}", item.toString()));
     }
 
+    public static ResourceLocation loc(String id) {
+        return ResourceLocation.fromNamespaceAndPath(MODID, id);
+    }
     @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents {
         @SubscribeEvent
@@ -80,6 +90,12 @@ public class Fishin {
             // Some client setup code
             LOGGER.info("HELLO FROM CLIENT SETUP");
             LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+            NeoForge.EVENT_BUS.addListener(FishingLayer::onInputMouseScrolling);
+        }
+        private static final ResourceLocation LAYER = loc("fishing_gui");
+        @SubscribeEvent
+        public static void onRegisterGuiLayers(RegisterGuiLayersEvent e) {
+            e.registerBelow(VanillaGuiLayers.HOTBAR, LAYER, new FishingLayer());
         }
     }
 }
