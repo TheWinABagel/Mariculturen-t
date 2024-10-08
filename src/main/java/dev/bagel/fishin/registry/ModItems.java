@@ -17,7 +17,7 @@ public class ModItems {
     public static final DeferredItem<BlockItem> EXAMPLE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("example_block", ModBlocks.EXAMPLE_BLOCK);
     public static final DeferredItem<Item> EXAMPLE_ITEM = ITEMS.registerSimpleItem("example_item", new Item.Properties().food(new FoodProperties.Builder()
             .alwaysEdible().nutrition(1).saturationModifier(2f).build()));
-    public static final DeferredItem<AbstractRod> BASIC_ROD = ITEMS.register("basic_rod",() -> new BasicRod(new Item.Properties().fireResistant().component(ModComponents.ROD_COMPONENT, new RodComponent(0, 9)).rarity(Rarity.EPIC), 200));
+    public static final DeferredItem<AbstractRod> BASIC_ROD = ITEMS.register("basic_rod",() -> new BasicRod(new Item.Properties().fireResistant().rarity(Rarity.EPIC), 200));
     public static final DeferredItem<ArmorItem> DEBUG_FISHING_ARMOR = ITEMS.register("fishing_armor",() -> new ArmorItem(ArmorMaterials.LEATHER, ArmorItem.Type.HELMET, new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(50))));
 
     public static void init(IEventBus modBus) {

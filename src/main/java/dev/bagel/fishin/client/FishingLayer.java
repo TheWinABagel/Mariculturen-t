@@ -103,7 +103,7 @@ public class FishingLayer implements LayeredDraw.Layer {
             for (ItemStack handStack : Minecraft.getInstance().player.getHandSlots()) {
                 if (handStack.is(ModItems.BASIC_ROD.asItem())) {
                     RodComponent rodComponent = handStack.getOrDefault(ModComponents.ROD_COMPONENT, RodComponent.DEFAULT);
-                    handStack.set(ModComponents.ROD_COMPONENT, rodComponent.add(e.getScrollDeltaY() > 0 ? -1 : 1));
+                    handStack.update(ModComponents.ROD_COMPONENT, RodComponent.DEFAULT, a -> rodComponent.add(e.getScrollDeltaY() > 0 ? -1 : 1));
                     e.setCanceled(true);
                 }
             }

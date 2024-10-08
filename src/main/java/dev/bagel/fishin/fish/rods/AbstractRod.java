@@ -1,5 +1,11 @@
 package dev.bagel.fishin.fish.rods;
 
+import dev.bagel.fishin.fish.rods.abilities.AbstractAbility;
+import dev.bagel.fishin.fish.rods.abilities.FishingAbilities;
+import dev.bagel.fishin.registry.ModComponents;
+import dev.bagel.fishin.registry.components.RodComponent;
+import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -17,47 +23,28 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public abstract class AbstractRod extends FishingRodItem {
-    public AbstractRod(Properties properties, int durability) {
-        super(properties.stacksTo(1).durability(durability));
+    protected final NonNullList<AbstractAbility> abilities;
+    public AbstractRod(Properties properties, int durability, int maxSlots) {
+        super(properties.stacksTo(1).component(ModComponents.ROD_COMPONENT, new RodComponent(0, maxSlots)).durability(durability));
+        abilities = NonNullList.withSize(maxSlots, FishingAbilities.EMPTY_ABILITY);
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
-        ItemStack currentItem = player.getItemInHand(hand);
-
-        if (player.fishing != null) {
-            if (!world.isClientSide) {
-                int damageAmount = player.fishing.retrieve(currentItem);
-                ItemStack originalItem = currentItem.copy();
-                currentItem.hurtAndBreak(damageAmount, player, LivingEntity.getSlotForHand(hand));
-
-                if (currentItem.isEmpty()) {
-                    net.neoforged.neoforge.event.EventHooks.onPlayerDestroyItem(player, originalItem, hand);
-                }
-            }
-
-            world.playSound(null, player.getX(), player.getY(), player.getZ(),
-                    SoundEvents.FISHING_BOBBER_RETRIEVE, SoundSource.NEUTRAL,
-                    1.0F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
-            player.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
-        } else {
-            world.playSound(null, player.getX(), player.getY(), player.getZ(),
-                    SoundEvents.FISHING_BOBBER_THROW, SoundSource.NEUTRAL,
-                    0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
-
-            if (world instanceof ServerLevel serverLevel) {
-                int fishingTimeReduction = (int) (EnchantmentHelper.getFishingTimeReduction(serverLevel, currentItem, player) * 20.0F);
-                int fishingLuckBonus = EnchantmentHelper.getFishingLuckBonus(serverLevel, currentItem, player);
-                world.addFreshEntity(new CustomFishingHook(player, world, fishingLuckBonus, fishingTimeReduction));
-            }
-
-            player.awardStat(Stats.ITEM_USED.get(this));
-            player.gameEvent(GameEvent.ITEM_INTERACT_START);
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        ItemStack rodStack = player.getItemInHand(hand);
+        RodComponent component = rodStack.get(ModComponents.ROD_COMPONENT);
+        if (component != null) {
+            player.displayClientMessage(Component.literal("selected: %d, world is %s".formatted(component.selected(), level)), false);
+            return abilities.get(component.selected()).onCast(player, level, rodStack, hand);
         }
-
-        return InteractionResultHolder.sidedSuccess(currentItem, world.isClientSide());
+        else {
+            player.displayClientMessage(Component.literal("Rod component is null, how??"), false);
+            return InteractionResultHolder.fail(rodStack);
+        }
     }
 }

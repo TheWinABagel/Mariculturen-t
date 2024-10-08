@@ -3,6 +3,8 @@ package dev.bagel.fishin.fish.rods.abilities;
 import dev.bagel.fishin.fish.ItemFish;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -12,15 +14,15 @@ public abstract class AbstractAbility {
     private final ResourceLocation castId;
     private boolean isCast = false;
 
-    public AbstractAbility(ResourceLocation id, ResourceLocation castId) {
+    public AbstractAbility(ResourceLocation id) {
         this.id = id;
-        this.castId = castId;
+        this.castId = id.withSuffix("_cast");
     }
 
     /**
      * Fired when the bobber is cast
      * */
-    public abstract void onCast(Player player, Level level, ItemStack rodStack);
+    public abstract InteractionResultHolder<ItemStack> onCast(Player player, Level level, ItemStack rodStack, InteractionHand hand);
 
     /**
      * Fired when a fish is successfully caught

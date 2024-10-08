@@ -14,9 +14,9 @@ public record RodComponent(int selected, int max) {
             .apply(inst, RodComponent::new));
 
     public static final StreamCodec<ByteBuf, RodComponent> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.VAR_INT,
+            ByteBufCodecs.INT,
             RodComponent::selected,
-            ByteBufCodecs.VAR_INT,
+            ByteBufCodecs.INT,
             RodComponent::max,
             RodComponent::new
     );
