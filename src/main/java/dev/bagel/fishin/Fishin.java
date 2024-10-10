@@ -2,6 +2,7 @@ package dev.bagel.fishin;
 
 import com.mojang.logging.LogUtils;
 import dev.bagel.fishin.client.FishingLayer;
+import dev.bagel.fishin.network.NetworkEvents;
 import dev.bagel.fishin.registry.ModBlocks;
 import dev.bagel.fishin.registry.ModComponents;
 import dev.bagel.fishin.registry.ModEntities;
@@ -64,6 +65,7 @@ public class Fishin {
         ModBlocks.init(modEventBus);
         ModItems.init(modEventBus);
         ModComponents.init(modEventBus);
+        modEventBus.addListener(NetworkEvents::register);
 
 //        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }

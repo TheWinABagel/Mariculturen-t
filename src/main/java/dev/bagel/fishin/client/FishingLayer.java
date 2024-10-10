@@ -1,6 +1,7 @@
 package dev.bagel.fishin.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.bagel.fishin.network.payload.C2SUpdateComponent;
 import dev.bagel.fishin.registry.ModComponents;
 import dev.bagel.fishin.registry.ModItems;
 import dev.bagel.fishin.registry.components.RodComponent;
@@ -16,6 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 
@@ -103,8 +105,11 @@ public class FishingLayer implements LayeredDraw.Layer {
             for (ItemStack handStack : Minecraft.getInstance().player.getHandSlots()) {
                 if (handStack.is(ModItems.BASIC_ROD.asItem())) {
                     RodComponent rodComponent = handStack.getOrDefault(ModComponents.ROD_COMPONENT, RodComponent.DEFAULT);
-                    handStack.update(ModComponents.ROD_COMPONENT, RodComponent.DEFAULT, a -> rodComponent.add(e.getScrollDeltaY() > 0 ? -1 : 1));
+                    rodComponent = rodComponent.add(e.getScrollDeltaY() > 0 ? -1 : 1);
+                    PacketDistributor.sendToServer(new C2SUpdateComponent(rodComponent, handStack));
+                    handStack.set(ModComponents.ROD_COMPONENT, rodComponent);
                     e.setCanceled(true);
+                    break;
                 }
             }
         }
